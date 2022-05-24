@@ -55,3 +55,7 @@ spy update # Update the database of packages with the collected information
 ```
 spy show # List the usage for packages
 ```
+
+# License
+
+GPLv3
