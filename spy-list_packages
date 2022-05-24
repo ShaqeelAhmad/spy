@@ -1,0 +1,18 @@
+#!/bin/sh
+
+## Output a newline separated list of packages which will be passed to
+## list-package-files. Only one package name is passed at a time to
+## list-package-files.
+
+valid_command() {
+	command -v "$1" >/dev/null 2>&1
+}
+
+if valid_command pacman; then
+	pacman -Qqe
+elif valid_command apk; then
+	apk info | grep -x -f /etc/apk/world
+else
+	printf "No supported package manager found\n" >&2
+	exit 1
+fi
