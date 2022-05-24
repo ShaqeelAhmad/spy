@@ -4,9 +4,10 @@ a program that collects data about the processes that run on your system.
 The intended use for this is to show the most often / commonly used package and
 to find the packages that are not used by anything.
 
-# Requirements
+# Requirements / Dependencies
 - A go 1.16 or later compiler*
 - The `proc` directory usually at `/proc`
+- scdoc (for manpage)
 
 \* Checkout the go1.13 branch to compile using older go versions. This is done
 because some things are deprecated or not recommended in newer versions of Go,
