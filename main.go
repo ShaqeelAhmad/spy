@@ -100,7 +100,7 @@ func fullPath(s string) string {
 		return s
 	}
 
-	for _, path := range strings.Split(os.Getenv("PATH"), ":") {
+	for _, path := range filepath.SplitList(os.Getenv("PATH")) {
 		fullpath := filepath.Join(path, s)
 		_, err := os.Stat(fullpath)
 		if err == nil {
@@ -382,6 +382,7 @@ func userDataDir() string {
 			dir += "/.local/share"
 		}
 	}
+	dir += "/spy"
 	return dir
 }
 
