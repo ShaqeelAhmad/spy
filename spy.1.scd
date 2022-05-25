@@ -62,6 +62,10 @@ Must be located at XDG_CONFIG_HOME/spy/config
 	this implementation only cares about the prefix, so giving any pattern that
 	matches with the first parts of a file will be ignored.
 
+*dbFile*
+	The database file to write to. This should be an absolute path because
+	they're not expanded (e.g ~ and $HOME are taken literally)
+
 Copy the config file in EXAMPLE_CONFIG_PATH or the example.config distributed
 with source code to XDG_CONFIG_HOME/spy/config. The EXAMPLE_CONFIG_PATH file is
 not read by the program and serves only as an example to the user.
