@@ -9,10 +9,11 @@ to find the packages that are not used by anything.
 - The `proc` directory usually at `/proc`
 - scdoc (for manpage)
 
-\* Checkout the go1.13 branch to compile using older go versions. This is done
-because some things are deprecated or not recommended in newer versions of Go,
-specifically the `ioutil` package whose functionalities are now provided by `os` and
-`io` pacakge. Go version 1.13 and newer should work with the branch.
+\* Checkout the go1.13 branch to compile using older go versions (1.13 to
+1.15). This is done because some things are deprecated or not recommended in
+newer versions of Go, specifically the `ioutil` package whose functionalities
+are now provided by `os` and `io` pacakge. Go version 1.13 and newer should
+work with the branch.
 
 # Issues
 - It uses more cpu than I would like, but that's mainly due to the files that
@@ -23,13 +24,14 @@ specifically the `ioutil` package whose functionalities are now provided by `os`
   all the packages and listing all the files for the packages.
 
 \* It takes me about 29.257 seconds on a cold cache and 3.993 seconds on a warm
-cache. I have about 311 packages and 304514 files listed. The long time
-is probably due to using a 10~ year old computer without a SSD.
+cache. It'll probably not be that bad considering you don't need to run this
+everytime.
 
 # Installing
 
 ```
 git clone https://github.com/ShaqeelAhmad/spy
+# For the 1.13 branch: git clone -b go1.13 https://github.com/ShaqeelAhmad/spy
 cd spy
 make
 sudo make install
@@ -54,7 +56,7 @@ spy update # Update the database of packages with the collected information
 ```
 
 ```
-spy show # List the usage for packages
+spy show | sort -n # List the usage for packages and sort it
 ```
 
 # License
