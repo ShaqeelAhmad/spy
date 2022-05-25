@@ -521,6 +521,7 @@ func usage(f *os.File) {
 	fmt.Fprintln(f, "\thelp      show this help")
 	fmt.Fprintln(f, "")
 	fmt.Fprintln(f, "options:")
+	flag.CommandLine.SetOutput(f)
 	flag.PrintDefaults()
 	fmt.Fprintln(f, "For more information lookup the manpage with `man spy`")
 }
