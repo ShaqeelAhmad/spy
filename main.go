@@ -58,7 +58,7 @@ var defaultIgnoredPrefix = []string{
 	"/home",
 	"/proc",
 	"/dev",
-	"/tmp/go-build",
+	"/tmp",
 }
 
 func stringPrefixIgnored(s string, ignoredPrefix []string) bool {
