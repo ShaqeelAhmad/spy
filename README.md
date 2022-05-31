@@ -42,10 +42,11 @@ Note:
   and are executable.
 
 ```
-spy collect # Start collecting information
-killall -SIGHUP spy # Reload config file
-spy update # Update the database of packages with the collected information
-spy show | sort -n # List the usage for packages and sort it
+spy collect           # Start collecting information
+killall -SIGHUP spy   # Reload config file
+spy update            # Update the database
+spy show | sort -n    # List the usage for packages and sort it
+spy show | grep '^0'  # show the packages that are not used at all
 ```
 
 # License

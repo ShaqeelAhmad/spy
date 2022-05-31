@@ -47,7 +47,7 @@ _XDG\_CONFIG\_HOME_
 	The directory to search for the config file. Defaults to HOME/.config if unset.
 
 # CONFIG FILE
-Must be located at XDG_CONFIG_HOME/spy/config
+Must be in $XDG_CONFIG_HOME/spy/config
 
 *interval*
 	A negative number means only collect once and quit. Any other number
@@ -68,9 +68,18 @@ Must be located at XDG_CONFIG_HOME/spy/config
 	they're not expanded (e.g ~ and $HOME are taken literally and a file with
 	the name ~ or $HOME will be created)
 
-Copy the config file in EXAMPLE_CONFIG_PATH or the example.config distributed
-with source code to XDG_CONFIG_HOME/spy/config. The EXAMPLE_CONFIG_PATH file is
-not read by the program and serves only as an example to the user.
+*listPackages*
+	The command that gets executed to list the packages. Defaults to
+	spy-list_packages.
+
+*listFiles*
+	The command that gets executed to list the files belonging to a package.
+	The last argument will be the package name. Defaults to
+	spy-list_package_files.
+
+Copy the example config file in EXAMPLE_CONFIG_PATH to
+$XDG_CONFIG_HOME/spy/config. The file in EXAMPLE_CONFIG_PATH is not read by the
+program and serves only as an example to the user.
 
 # SIGNALS
 *SIGHUP*

@@ -22,15 +22,17 @@ import (
 type filesCount = int64
 
 type config struct {
-	configFile    string
-	dbFile        string
-	interval      int
-	procDir       string
-	dataDir       string
-	ignoredPrefix []string
+	listPackagesCmd []string
+	listFilesCmd    []string
+	configFile      string
+	dbFile          string
+	interval        int
+	procDir         string
+	dataDir         string
+	ignoredPrefix   []string
 }
 
-var debug = true
+var debug = false
 
 // Use interface{} because go1.18 is still new
 func debugLog(format string, a ...interface{}) {
@@ -255,8 +257,8 @@ func collect(conf config) {
 	}
 }
 
-func listPackages() []string {
-	cmd := exec.Command("spy-list_packages")
+func listPackages(command []string) []string {
+	cmd := exec.Command(command[0], command[1:]...)
 	list, err := cmd.Output()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, cmd.Args, err)
@@ -266,8 +268,8 @@ func listPackages() []string {
 	return strings.Split(strings.TrimSpace(string(list)), "\n")
 }
 
-func listFilesForPackage(pkg string) []string {
-	cmd := exec.Command("spy-list_package_files", pkg)
+func listFilesForPackage(pkg string, command []string) []string {
+	cmd := exec.Command(command[0], append(command[1:], pkg)...)
 
 	list, err := cmd.Output()
 	if err != nil {
@@ -279,10 +281,11 @@ func listFilesForPackage(pkg string) []string {
 	return strings.Split(strings.TrimSpace(string(list)), "\n")
 }
 
-func updatePkgData(dir string, dbFile string) {
+func updatePkgData(dir string, conf config) {
+	dbFile := conf.dbFile
 	os.MkdirAll(dir, 0755)
 
-	pkgList := listPackages()
+	pkgList := listPackages(conf.listPackagesCmd)
 	filesMap, err := parseScfgDBFile(dbFile)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to parse db file ", err)
@@ -290,7 +293,7 @@ func updatePkgData(dir string, dbFile string) {
 	}
 
 	for _, pkg := range pkgList {
-		files := listFilesForPackage(pkg)
+		files := listFilesForPackage(pkg, conf.listFilesCmd)
 		f, err := os.Create(filepath.Join(dir, pkg))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -415,47 +418,52 @@ func parseScfgConfigFile(file string) (config, error) {
 
 	// default config
 	conf := config{
-		configFile:    file,
-		dbFile:        dataDir + "/db",
-		interval:      2,
-		procDir:       "/proc",
-		dataDir:       dataDir,
-		ignoredPrefix: defaultIgnoredPrefix,
+		configFile:      file,
+		dbFile:          dataDir + "/db",
+		interval:        2,
+		procDir:         "/proc",
+		dataDir:         dataDir,
+		ignoredPrefix:   defaultIgnoredPrefix,
+		listPackagesCmd: []string{"spy-list_packages"},
+		listFilesCmd:    []string{"spy-list_package_files"},
 	}
 
 	blocks, err := scfg.Load(file)
 	if err != nil {
 		return conf, fmt.Errorf("scfg: %w", err)
 	}
+
+	paramError := func(block *scfg.Directive, expected interface{}) {
+		fmt.Fprintf(os.Stderr, "Error: %s expected %v param got %d\n",
+			block.Name, expected, len(block.Params))
+	}
 	for _, block := range blocks {
 		switch block.Name {
 		case "interval":
 			if len(block.Params) != 1 {
-				fmt.Fprintf(os.Stderr, "Error: expected 1 param got %d\n",
-					len(block.Params))
+				paramError(block, 1)
 				continue
 			}
 			val, err := strconv.Atoi(block.Params[0])
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				fmt.Fprintln(os.Stderr, block.Name, err)
 				continue
 			}
 			conf.interval = val
 			debugLog("[CONFIG] Set interval to %v", val)
 		case "procDir":
 			if len(block.Params) != 1 {
-				fmt.Fprintf(os.Stderr, "Error: expected 1 param got %d\n",
-					len(block.Params))
+				paramError(block, 1)
 				continue
 			}
 			dirname := block.Params[0]
 			stat, err := os.Stat(dirname)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				fmt.Fprintln(os.Stderr, block.Name, err)
 				os.Exit(1)
 			}
 			if !stat.IsDir() {
-				fmt.Fprintf(os.Stderr, "Error: %s is not a directory\n", dirname)
+				fmt.Fprintf(os.Stderr, "Error: procDir: %s is not a directory\n", dirname)
 				os.Exit(1)
 			}
 			conf.procDir = dirname
@@ -469,12 +477,25 @@ func parseScfgConfigFile(file string) (config, error) {
 			debugLog("[CONFIG] Set ignoredPrefix to %v", prefixes)
 		case "dbFile":
 			if len(block.Params) != 1 {
-				fmt.Fprintf(os.Stderr, "Error: expected 1 parameter got %d\n",
-					len(block.Params))
+				paramError(block, 1)
 				continue
 			}
 			conf.dbFile = block.Params[0]
 			debugLog("[CONFIG] Set dbFile to %v", conf.dbFile)
+		case "listPackages":
+			if len(block.Params) < 1 {
+				paramError(block, "at least 1")
+				continue
+			}
+			conf.listPackagesCmd = block.Params
+			debugLog("[CONFIG] Set listPackagesCmd to %v", conf.listPackagesCmd)
+		case "listFiles":
+			if len(block.Params) < 1 {
+				paramError(block, "at least 1")
+				continue
+			}
+			conf.listFilesCmd = block.Params
+			debugLog("[CONFIG] Set listFilesCmd to %v", conf.listFilesCmd)
 		default:
 			fmt.Fprintf(os.Stderr, "Ignoring %s, unrecognized directive\n", block.Name)
 		}
@@ -555,7 +576,7 @@ func main() {
 		showData(conf.dataDir + "/data")
 	case "update":
 		conf := getConfig(configFile)
-		updatePkgData(conf.dataDir+"/data", conf.dbFile)
+		updatePkgData(conf.dataDir+"/data", conf)
 	case "help":
 		usage(os.Stdout)
 	default:
