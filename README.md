@@ -20,12 +20,8 @@ work with the branch.
   are read in `/proc`. Using something like `lsof` every second or so will
   provide a similar usage. You could set `interval` in the config file to
   match your preferences.
-- Updating the database (`spy update`) takes a long time*  because of listing
+- Updating the database (`spy update`) takes a long time because of listing
   all the packages and listing all the files for the packages.
-
-\* It takes me about 29.257 seconds on a cold cache and 3.993 seconds on a warm
-cache. It'll probably not be that bad considering you don't need to run this
-everytime.
 
 # Installing
 
@@ -38,24 +34,17 @@ sudo make install
 ```
 
 # Usage
+Note:
+* Terminals give SIGHUP to a process running in it when the terminal is
+  quitting and spy might not quit because SIGHUP causes reloading config file.
+  To actually kill it use SIGTERM or SIGINT.
+* `spy update` assumes spy-list_packages and spy-list_package_files are in PATH
+  and are executable.
 
 ```
 spy collect # Start collecting information
-```
-
-Note that terminals give SIGHUP to a process running in it when the terminal is
-quitting and spy might not quit. To actually kill it use SIGTERM or SIGINT.
-```
 killall -SIGHUP spy # Reload config file
-```
-
-`spy update` assumes spy-list_packages and spy-list_package_files are in PATH
-and are executable.
-```
 spy update # Update the database of packages with the collected information
-```
-
-```
 spy show | sort -n # List the usage for packages and sort it
 ```
 

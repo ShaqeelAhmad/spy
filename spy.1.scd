@@ -32,7 +32,8 @@ _spy_ [options] <command>
 	packages you have.
 
 *show*
-	Show the package usages. Use `spy show | sort -n` to sort it.
+	Show the package usage frequency. Remember to update the database first with
+	*update* to get the newest data.
 
 *help*
 	Shows a short help message.
@@ -60,11 +61,12 @@ Must be located at XDG_CONFIG_HOME/spy/config
 	The prefixes that are ignored. There are certain directories where you would
 	not want to store information about them like the `/tmp` directory. Though
 	this implementation only cares about the prefix, so giving any pattern that
-	matches with the first parts of a file will be ignored.
+	matches with the first parts of a path will be ignored.
 
 *dbFile*
 	The database file to write to. This should be an absolute path because
-	they're not expanded (e.g ~ and $HOME are taken literally)
+	they're not expanded (e.g ~ and $HOME are taken literally and a file with
+	the name ~ or $HOME will be created)
 
 Copy the config file in EXAMPLE_CONFIG_PATH or the example.config distributed
 with source code to XDG_CONFIG_HOME/spy/config. The EXAMPLE_CONFIG_PATH file is
