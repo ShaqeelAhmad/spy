@@ -21,7 +21,6 @@ to find the packages that are not used by anything.
 
 ```
 git clone https://github.com/ShaqeelAhmad/spy
-# For the 1.13 branch: git clone -b go1.13 https://github.com/ShaqeelAhmad/spy
 cd spy
 make
 sudo make install
