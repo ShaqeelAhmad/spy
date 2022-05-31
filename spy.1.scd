@@ -68,15 +68,6 @@ Must be in $XDG_CONFIG_HOME/spy/config
 	they're not expanded (e.g ~ and $HOME are taken literally and a file with
 	the name ~ or $HOME will be created)
 
-*listPackages*
-	The command that gets executed to list the packages. Defaults to
-	spy-list_packages.
-
-*listFiles*
-	The command that gets executed to list the files belonging to a package.
-	The last argument will be the package name. Defaults to
-	spy-list_package_files.
-
 Copy the example config file in EXAMPLE_CONFIG_PATH to
 $XDG_CONFIG_HOME/spy/config. The file in EXAMPLE_CONFIG_PATH is not read by the
 program and serves only as an example to the user.

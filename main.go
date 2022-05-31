@@ -23,8 +23,6 @@ import (
 type filesCount = int64
 
 type config struct {
-	listPackagesCmd []string
-	listFilesCmd    []string
 	configFile      string
 	dbFile          string
 	interval        int
@@ -258,8 +256,8 @@ func collect(conf config) {
 	}
 }
 
-func listPackages(command []string) []string {
-	cmd := exec.Command(command[0], command[1:]...)
+func listPackages() []string {
+	cmd := exec.Command("spy-list_packages")
 	list, err := cmd.Output()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, cmd.Args, err)
@@ -269,8 +267,8 @@ func listPackages(command []string) []string {
 	return strings.Split(strings.TrimSpace(string(list)), "\n")
 }
 
-func listFilesForPackage(pkg string, command []string) []string {
-	cmd := exec.Command(command[0], append(command[1:], pkg)...)
+func listFilesForPackage(pkg string) []string {
+	cmd := exec.Command("spy-list_package_files", pkg)
 
 	list, err := cmd.Output()
 	if err != nil {
@@ -286,7 +284,7 @@ func updatePkgData(dir string, conf config) {
 	dbFile := conf.dbFile
 	os.MkdirAll(dir, 0755)
 
-	pkgList := listPackages(conf.listPackagesCmd)
+	pkgList := listPackages()
 	filesMap, err := parseScfgDBFile(dbFile)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Failed to parse db file ", err)
@@ -294,7 +292,7 @@ func updatePkgData(dir string, conf config) {
 	}
 
 	for _, pkg := range pkgList {
-		files := listFilesForPackage(pkg, conf.listFilesCmd)
+		files := listFilesForPackage(pkg)
 		f, err := os.Create(filepath.Join(dir, pkg))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -425,8 +423,6 @@ func parseScfgConfigFile(file string) (config, error) {
 		procDir:         "/proc",
 		dataDir:         dataDir,
 		ignoredPrefix:   defaultIgnoredPrefix,
-		listPackagesCmd: []string{"spy-list_packages"},
-		listFilesCmd:    []string{"spy-list_package_files"},
 	}
 
 	blocks, err := scfg.Load(file)
@@ -434,8 +430,8 @@ func parseScfgConfigFile(file string) (config, error) {
 		return conf, fmt.Errorf("scfg: %w", err)
 	}
 
-	paramError := func(block *scfg.Directive, expected interface{}) {
-		fmt.Fprintf(os.Stderr, "Error: %s expected %v param got %d\n",
+	paramError := func(block *scfg.Directive, expected int) {
+		fmt.Fprintf(os.Stderr, "Error: %s expected %d param got %d\n",
 			block.Name, expected, len(block.Params))
 	}
 	for _, block := range blocks {
@@ -483,20 +479,6 @@ func parseScfgConfigFile(file string) (config, error) {
 			}
 			conf.dbFile = block.Params[0]
 			debugLog("[CONFIG] Set dbFile to %v", conf.dbFile)
-		case "listPackages":
-			if len(block.Params) < 1 {
-				paramError(block, "at least 1")
-				continue
-			}
-			conf.listPackagesCmd = block.Params
-			debugLog("[CONFIG] Set listPackagesCmd to %v", conf.listPackagesCmd)
-		case "listFiles":
-			if len(block.Params) < 1 {
-				paramError(block, "at least 1")
-				continue
-			}
-			conf.listFilesCmd = block.Params
-			debugLog("[CONFIG] Set listFilesCmd to %v", conf.listFilesCmd)
 		default:
 			fmt.Fprintf(os.Stderr, "Ignoring %s, unrecognized directive\n", block.Name)
 		}
