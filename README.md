@@ -5,15 +5,9 @@ The intended use for this is to show the most often / commonly used package and
 to find the packages that are not used by anything.
 
 # Requirements / Dependencies
-- A go 1.16 or later compiler*
+- A go 1.13 or later compiler
 - The `proc` directory usually at `/proc`
 - scdoc (for manpage)
-
-\* Checkout the go1.13 branch to compile using older go versions (1.13 to
-1.15). This is done because some things are deprecated or not recommended in
-newer versions of Go, specifically the `ioutil` package whose functionalities
-are now provided by `os` and `io` pacakge. Go version 1.13 and newer should
-work with the branch.
 
 # Issues
 - It uses more cpu than I would like, but that's mainly due to the files that

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -75,7 +76,7 @@ func stringPrefixIgnored(s string, ignoredPrefix []string) bool {
 func getFiles(path string, ignoredPrefix []string) []string {
 	var filesMap []string
 	dir := path + "/map_files"
-	files, err := os.ReadDir(dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return nil
 	}
@@ -116,7 +117,7 @@ func fullPath(s string) string {
 func procCommand(s string, ignoredPrefix []string) []string {
 	var commands []string
 
-	b, err := os.ReadFile(s + "/cmdline")
+	b, err := ioutil.ReadFile(s + "/cmdline")
 	if err != nil {
 		return nil
 	}
@@ -153,7 +154,7 @@ func procCommand(s string, ignoredPrefix []string) []string {
 }
 
 func updateData(filesMap map[string]filesCount, ignoredPrefix []string, procDir string) map[string]filesCount {
-	procFiles, err := os.ReadDir(procDir)
+	procFiles, err := ioutil.ReadDir(procDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -319,7 +320,7 @@ func parseWhileInt(s string) (filesCount, error) {
 }
 
 func showData(dir string) {
-	files, err := os.ReadDir(dir)
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
