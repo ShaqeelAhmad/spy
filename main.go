@@ -23,12 +23,12 @@ import (
 type filesCount = int64
 
 type config struct {
-	configFile      string
-	dbFile          string
-	interval        int
-	procDir         string
-	dataDir         string
-	ignoredPrefix   []string
+	configFile    string
+	dbFile        string
+	interval      int
+	procDir       string
+	pkgDir        string
+	ignoredPrefix []string
 }
 
 var debug = false
@@ -417,12 +417,12 @@ func parseScfgConfigFile(file string) (config, error) {
 
 	// default config
 	conf := config{
-		configFile:      file,
-		dbFile:          dataDir + "/db",
-		interval:        2,
-		procDir:         "/proc",
-		dataDir:         dataDir,
-		ignoredPrefix:   defaultIgnoredPrefix,
+		configFile:    file,
+		dbFile:        dataDir + "/db",
+		interval:      2,
+		procDir:       "/proc",
+		pkgDir:        dataDir + "/data",
+		ignoredPrefix: defaultIgnoredPrefix,
 	}
 
 	blocks, err := scfg.Load(file)
@@ -556,10 +556,10 @@ func main() {
 		collect(conf)
 	case "show":
 		conf := getConfig(configFile)
-		showData(conf.dataDir + "/data")
+		showData(conf.pkgDir)
 	case "update":
 		conf := getConfig(configFile)
-		updatePkgData(conf.dataDir+"/data", conf)
+		updatePkgData(conf.pkgDir, conf)
 	case "help":
 		usage(os.Stdout)
 	default:
