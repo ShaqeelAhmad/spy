@@ -1,27 +1,26 @@
 #!/bin/sh
 
-## A package name argument is passed to this script.
-##
-## Handle it however you must to produce a newline separated list of the full
-## paths of the files belonging to that package.
-##
-## While directories or invalid files may be passed, it's not really
-## collected by `spy collect` and would be just be taking up more space without
-## being used.
 valid_command() {
 	command -v "$1" >/dev/null 2>&1
 }
 
-if valid_command pacman; then
-	pacman -Qql "$1" | grep -v '/$'
+list_package_files() {
+	if valid_command pacman; then
+		pacman -Qql "$1" | grep -v '/$'
+		# pacman might output nothing and grep will return a nonzero exitcode
+		# because it didn't find anything. So exit with a 0 explicitly. This will
+		# allow invalid packages to exit with a 0 exit code too though.
+		exit 0
+	elif valid_command apk; then
+		apk info --contents "$1" | awk '/\// {printf "/%s\n", $0}'
+	else
+		printf "No supported package manager found\n" >&2
+		exit 1
+	fi
+}
 
-	# pacman might output nothing and grep will return a nonzero exitcode
-	# because it didn't find anything. So exit with a 0 explicitly. This will
-	# allow invalid packages to exit with a 0 exit code too though.
-	exit 0
-elif valid_command apk; then
-	apk info --contents "$1" | awk '/\// {printf "/%s\n", $0}'
-else
-	printf "No supported package manager found\n" >&2
-	exit 1
-fi
+File="${XDG_CONFIG_HOME:-$HOME/.config}/spy/update"
+
+[ -r "$File" ] && . "$File"
+
+list_package_files "$1"

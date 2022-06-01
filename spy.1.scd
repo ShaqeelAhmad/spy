@@ -16,7 +16,7 @@ _spy_ [options] <command>
 	Specify a config file
 
 *-d*
-	Enable logging information.
+	Enable debug logging.
 
 # COMMAND
 
@@ -47,7 +47,7 @@ _XDG\_CONFIG\_HOME_
 	The directory to search for the config file. Defaults to HOME/.config if unset.
 
 # CONFIG FILE
-Must be in $XDG_CONFIG_HOME/spy/config
+$XDG_CONFIG_HOME/spy/config
 
 *interval*
 	A negative number means only collect once and quit. Any other number
@@ -68,16 +68,26 @@ Must be in $XDG_CONFIG_HOME/spy/config
 	they're not expanded (e.g ~ and $HOME are taken literally and a file with
 	the name ~ or $HOME will be created)
 
-Copy the example config file in EXAMPLE_CONFIG_PATH to
-$XDG_CONFIG_HOME/spy/config. The file in EXAMPLE_CONFIG_PATH is not read by the
-program and serves only as an example to the user.
 
-# SIGNALS
-*SIGHUP*
-	Reload the config file
 
-*SIGTERM*, *SIGQUIT*
-	Quit
+$XDG_CONFIG_HOME/spy/update
+
+These functions are defined but could be overidden by custom ones defined by the
+user in $XDG_CONFIG_HOME/spy/update because the helper scripts are just shell
+scripts and read this config file.
+
+*list_package_files()*
+	This function must list out the files belonging to the package argument
+	passed to it.
+
+*list_packages*
+	This function must list out all the packages that are installed by the user.
+	You could filter it however you want using the shell.
+
+
+Copy the example files in EXAMPLE_CONFIG_PATH to $XDG_CONFIG_HOME/spy/. The
+files in EXAMPLE_CONFIG_PATH are not read by the program and serves only as an
+example to the user.
 
 # HELPER SCRIPTS
 
@@ -86,6 +96,13 @@ program and serves only as an example to the user.
 
 *spy-list_package_files*
 	This scripts lists the files belonging to a package.
+
+# SIGNALS
+*SIGHUP*
+	Reload the config file
+
+*SIGTERM*, *SIGQUIT*
+	Quit
 
 # SEE ALSO
 *proc*(5)

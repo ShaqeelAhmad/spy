@@ -10,7 +10,7 @@ GO ?= go
 all: spy spy.1
 
 spy.1: spy.1.scd
-	sed 's|EXAMPLE_CONFIG_PATH|$(ETCDIR)/spy/config|g' spy.1.scd | scdoc > spy.1
+	sed 's|EXAMPLE_CONFIG_PATH|$(ETCDIR)/spy/|g' spy.1.scd | scdoc > spy.1
 
 spy: main.go
 	$(GO) build -o spy
@@ -22,11 +22,12 @@ install: all
 	cp -f spy.1 $(MANDIR)
 	mkdir -p $(ETCDIR)/spy
 	cp -f example.config $(ETCDIR)/spy/config
+	cp -f example.update $(ETCDIR)/spy/update
 
 uninstall:
 	rm -f $(BINDIR)/spy $(BINDIR)/spy-list_package_files $(BINDIR)/spy-list_packages
 	rm -f $(MANDIR)/spy.1
-	rm -f $(ETCDIR)/spy/config
+	rm -f $(ETCDIR)/spy/config $(ETCDIR)/spy/update
 	rmdir $(ETCDIR)/spy
 
 clean:

@@ -1,0 +1,21 @@
+## Example for Arch linux
+
+## A package name argument is passed to this function
+##
+## This function produces a newline separated list of the full paths of the
+## files belonging to that package.
+##
+## While directories or invalid files may be passed, it's not really
+## collected by `spy collect` and would be just be taking up more space without
+## being used.
+list_package_files() {
+	pacman -Qql "$1" | grep -v '/$'
+	exit 0
+}
+
+## Output a newline separated list of packages which will be passed to
+## list-package-files. Only one package name is passed at a time to
+## list-package-files.
+list_packages() {
+	pacman -Qqe
+}
