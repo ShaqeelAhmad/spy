@@ -1,3 +1,4 @@
+VERSION = 0.8
 PREFIX ?= /usr/local
 
 # Note: you may want to set ETCDIR to only /etc when using /usr as PREFIX
@@ -13,7 +14,7 @@ spy.1: spy.1.scd
 	sed 's|EXAMPLE_CONFIG_PATH|$(ETCDIR)/spy/|g' spy.1.scd | scdoc > spy.1
 
 spy: main.go
-	$(GO) build -o spy
+	$(GO) build -o spy -ldflags '-X "main.version=$(VERSION)"'
 
 install: all
 	mkdir -p $(BINDIR)

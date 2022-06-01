@@ -31,7 +31,10 @@ type config struct {
 	ignoredPrefix []string
 }
 
-var debug = false
+var (
+	debug   = false
+	version = "-1"
+)
 
 // Use interface{} because go1.18 is still new
 func debugLog(format string, a ...interface{}) {
@@ -523,6 +526,7 @@ func usage(f *os.File) {
 	fmt.Fprintln(f, "\tupdate    update the database")
 	fmt.Fprintln(f, "\tshow      show the data for all the packages")
 	fmt.Fprintln(f, "\thelp      show this help")
+	fmt.Fprintln(f, "\tversion   show spy version")
 	fmt.Fprintln(f, "")
 	fmt.Fprintln(f, "options:")
 	flag.CommandLine.SetOutput(f)
@@ -532,14 +536,20 @@ func usage(f *os.File) {
 
 func main() {
 	configFile := ""
+	help := false
+	showVersion := false
 	flag.StringVar(&configFile, "c", "", "Specify a config file")
 	flag.BoolVar(&debug, "d", false, "Enable debugging")
-	help := false
 	flag.BoolVar(&help, "h", false, "Show this help")
+	flag.BoolVar(&showVersion, "v", false, "Show the version")
 
 	flag.Parse()
 	if help {
 		usage(os.Stdout)
+		os.Exit(0)
+	}
+	if showVersion {
+		fmt.Printf("spy version %s\n", version)
 		os.Exit(0)
 	}
 
@@ -562,6 +572,8 @@ func main() {
 		updatePkgData(conf.pkgDir, conf)
 	case "help":
 		usage(os.Stdout)
+	case "version":
+		fmt.Printf("spy version %s\n", version)
 	default:
 		usage(os.Stderr)
 		os.Exit(1)

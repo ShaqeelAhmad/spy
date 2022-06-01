@@ -10,13 +10,16 @@ _spy_ [options] <command>
 
 # OPTIONS
 *-h*
-	Show a short help message
+	Show a short help message.
 
 *-c* <config>
-	Specify a config file
+	Specify a config file.
 
 *-d*
 	Enable debug logging.
+
+*-v*
+	Show version.
 
 # COMMAND
 
@@ -37,6 +40,9 @@ _spy_ [options] <command>
 
 *help*
 	Shows a short help message.
+
+*version*
+	Show version.
 
 # ENVIRONMENT VARIABLES
 
@@ -80,7 +86,7 @@ scripts and read this config file.
 	This function must list out the files belonging to the package argument
 	passed to it.
 
-*list_packages*
+*list_packages()*
 	This function must list out all the packages that are installed by the user.
 	You could filter it however you want using the shell.
 
