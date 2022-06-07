@@ -310,8 +310,7 @@ func updatePkgData(dir string, conf config) {
 
 func parseWhileInt(s string) (filesCount, error) {
 	i := 0
-	var r rune
-	for i, r = range s {
+	for _, r := range s {
 		if r < '0' || r > '9' {
 			break
 		}
@@ -330,14 +329,15 @@ func showData(dir string) {
 	var pkgs []string
 	for _, file := range files {
 		var freq filesCount
-		var pkg string
 
-		pkg = file.Name()
-		f, err := os.Open(filepath.Join(dir, file.Name()))
+		pkg := file.Name()
+		f, err := os.Open(filepath.Join(dir, pkg))
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
+		defer f.Close()
+
 		s := bufio.NewScanner(f)
 		for s.Scan() {
 			v, err := parseWhileInt(s.Text())

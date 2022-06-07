@@ -33,6 +33,6 @@ uninstall:
 
 clean:
 	rm -f spy spy.1
-	go clean
+	$(GO) clean
 
 .PHONY: install uninstall all clean
