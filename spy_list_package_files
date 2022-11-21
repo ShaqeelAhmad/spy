@@ -8,8 +8,10 @@ list_package_files() {
 	if valid_command pacman; then
 		pacman -Qql "$1" | grep -v '/$'
 		# pacman might output nothing and grep will return a nonzero exitcode
-		# because it didn't find anything. So exit with a 0 explicitly. This will
-		# allow invalid packages to exit with a 0 exit code too though.
+		# because it didn't find anything. So exit with a 0 explicitly.
+		#
+		# This will allow invalid packages to exit with a 0 exit code too
+		# though.
 		exit 0
 	elif valid_command apk; then
 		apk info --contents "$1" | awk '/\// {printf "/%s\n", $0}'
@@ -23,4 +25,4 @@ File="${XDG_CONFIG_HOME:-$HOME/.config}/spy/update"
 
 [ -r "$File" ] && . "$File"
 
-list_package_files "$1"
+list_package_files "$1" | sort

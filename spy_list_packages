@@ -19,4 +19,4 @@ File="${XDG_CONFIG_HOME:-$HOME/.config}/spy/update"
 
 [ -r "$File" ] && . "$File"
 
-list_packages
+list_packages | sort
