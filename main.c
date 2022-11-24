@@ -54,6 +54,7 @@ static char *ignoredMapFilePrefixes[] = {
 	"/proc",
 	"/dev",
 	"/tmp",
+	"/var",
 };
 
 static void
