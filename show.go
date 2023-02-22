@@ -211,10 +211,95 @@ body {
 	margin-left: 1em;
 	margin-right: 1em;
 }
-form {
-	float:left;
-	margin-right:15px;
-	margin-bottom:10px;
+`
+
+var indexJs = `
+let colSorted = [false, false, false];
+function sortTable(idx) {
+	let table = document.querySelector("table");
+	let rows = [];
+	for (let y = 1; y < table.rows.length; y++) {
+		let cols = [];
+		for (let x = 0; x < table.rows[y].children.length; x++) {
+			cols.push({
+				text: table.rows[y].children[x].textContent,
+				html: table.rows[y].children[x].innerHTML
+			});
+		}
+		rows.push(cols);
+	}
+	rows.sort((a, b) => {
+		switch (idx) {
+		case 0:
+			if (colSorted[idx]) {
+				return b[idx].text.localeCompare(a[idx].text);
+			}
+			return a[idx].text.localeCompare(b[idx].text);
+		case 1:
+			if (colSorted[idx]) {
+				return a[idx].text - b[idx].text;
+			}
+			return b[idx].text - a[idx].text;
+		case 2:
+			let t1 = 0;
+			if (a[idx].text !== '0') {
+				t1 = Date.parse(a[idx].text)
+			}
+			let t2 = 0;
+			if (b[idx].text !== '0') {
+				t2 = Date.parse(b[idx].text)
+			}
+			if (colSorted[idx]) {
+				return t1 - t2;
+			}
+			return t2 - t1;
+		};
+	})
+	colSorted[idx] = !colSorted[idx];
+	for (let y = 1; y < table.rows.length; y++) {
+		for (let x = 0; x < table.rows[y].children.length; x++) {
+			table.rows[y].children[x].innerHTML = rows[y-1][x].html;
+		}
+	}
+}
+document.getElementById("head1").onclick = function() {
+	sortTable(0);
+	let div = document.getElementById("sortStatus1");
+	if (colSorted[0]) {
+		div.textContent = "↑";
+	} else {
+		div.textContent = "↓";
+	}
+	colSorted[1] = false;
+	document.getElementById("sortStatus2").textContent = "↔";
+	colSorted[2] = false;
+	document.getElementById("sortStatus3").textContent = "↔";
+}
+document.getElementById("head2").onclick = function() {
+	sortTable(1);
+	let div = document.getElementById("sortStatus2")
+	if (colSorted[1]) {
+		div.textContent = "↑";
+	} else {
+		div.textContent = "↓";
+	}
+	colSorted[0] = false;
+	document.getElementById("sortStatus1").textContent = "↔";
+	colSorted[2] = false;
+	document.getElementById("sortStatus3").textContent = "↔";
+}
+document.getElementById("head3").onclick = function() {
+	sortTable(2);
+	let div = document.getElementById("sortStatus3")
+	if (colSorted[2]) {
+		div.textContent = "↑";
+	} else {
+		div.textContent = "↓";
+	}
+	colSorted[0] = false;
+	document.getElementById("sortStatus1").textContent = "↔";
+	colSorted[1] = false;
+	document.getElementById("sortStatus2").textContent = "↔";
 }
 `
 
@@ -222,42 +307,26 @@ const htmlTemplate = `
 <!DOCTYPE html>
 <html>
 	<head>
+		<script type="text/javascript" src="/index.js" defer></script>
 		<title>{{ .Name }}</title>
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="/style.css">
 	</head>
 <body>
+{{ if .File }}
+<h4><a href="/">index</a></h4>
+{{ end }}
 <h3> {{ .Name }} </h3>
-<h4>sort by:</h4>
-<form action="{{.Path}}">
-	<input type="hidden" name="sort" value="usage">
-	<input type="submit" value="usage">
-</form>
-<form action="{{.Path}}">
-	<input type="hidden" name="sort" value="usage-desc">
-	<input type="submit" value="usage descending">
-</form>
-<form action="{{.Path}}">
-	<input type="hidden" name="sort" value="time">
-	<input type="submit" value="time">
-</form>
-<form action="{{.Path}}">
-	<input type="hidden" name="sort" value="time-desc">
-	<input type="submit" value="time descending">
-</form>
-<form action="{{.Path}}">
-	<input type="hidden" name="sort" value="name">
-	<input type="submit" value="name">
-</form>
-
 <table>
-<tr><th>
+<tr><th id="head1">
 {{ if .File }}
 Files
 {{ else }}
 Packages
 {{ end }}
-	</th><th>Times Used</th><th>Last used</th></tr>
+<div id="sortStatus1">↔</div>
+	</th><th id="head2">Times Used<div id="sortStatus2">↔</div></th>
+	<th id="head3">Last used<div id="sortStatus3">↔</div></th></tr>
 	{{ $File := .File }}
 	{{ range .Entries }}
 		<tr>
@@ -284,25 +353,32 @@ type handler struct {
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path == "/style.css" {
+	var (
+		isFile      = false
+		name        = "Packages"
+		entries any = nil
+	)
+	switch r.URL.Path {
+	case "/style.css":
 		w.Header().Set("Content-type", "text/css")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, styleCSS)
 		return
-	}
-
-	isFile := false
-	var entries any = h.pkgs
-	name := "Packages"
-	query := r.URL.Query()
-	v, ok := query["sort"]
-	sorting := ""
-	if ok && len(v) == 1 {
-		sorting = v[0]
-	}
-	if r.URL.Path != "/" && r.URL.Path != "/index.html" {
+	case "/index.js":
+		w.Header().Set("Content-type", "text/javascript")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, indexJs)
+		return
+	case "/", "/index.html":
+		sort.Slice(h.pkgs, func(i, j int) bool {
+			return h.pkgs[i].Name < h.pkgs[j].Name
+		})
+		entries = h.pkgs
+	default:
+		sort.Slice(h.pkgs, func(i, j int) bool {
+			return h.pkgs[i].Name < h.pkgs[j].Name
+		})
 		path := strings.Trim(r.URL.Path, "/")
-		sort.Slice(h.pkgs, func(i, j int) bool { return h.pkgs[i].Name < h.pkgs[j].Name })
 		i, found := sort.Find(len(h.pkgs), func(i int) int {
 			return strings.Compare(path, h.pkgs[i].Name)
 		})
@@ -312,62 +388,9 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		files := h.pkgs[i].Files
-		f := func(i, j int) bool {
-			return files[i].Name < files[j].Name
-		}
-		switch sorting {
-		case "time":
-			f = func(i, j int) bool {
-				return files[i].Time.Unix() > files[j].Time.Unix()
-			}
-		case "time-desc":
-			f = func(i, j int) bool {
-				return files[i].Time.Unix() < files[j].Time.Unix()
-			}
-		case "usage":
-			f = func(i, j int) bool {
-				return files[i].Usage > files[j].Usage
-			}
-		case "usage-desc":
-			f = func(i, j int) bool {
-				return files[i].Usage < files[j].Usage
-			}
-		case "asc":
-			f = func(i, j int) bool {
-				return files[i].Name > files[j].Name
-			}
-		}
-		sort.Slice(files, f)
 		entries = files
 		name = h.pkgs[i].Name
 		isFile = true
-	} else {
-		f := func(i, j int) bool {
-			return h.pkgs[i].Name < h.pkgs[j].Name
-		}
-		switch sorting {
-		case "time":
-			f = func(i, j int) bool {
-				return h.pkgs[i].Time.Unix() > h.pkgs[j].Time.Unix()
-			}
-		case "time-desc":
-			f = func(i, j int) bool {
-				return h.pkgs[i].Time.Unix() < h.pkgs[j].Time.Unix()
-			}
-		case "usage":
-			f = func(i, j int) bool {
-				return h.pkgs[i].Usage > h.pkgs[j].Usage
-			}
-		case "usage-desc":
-			f = func(i, j int) bool {
-				return h.pkgs[i].Usage < h.pkgs[j].Usage
-			}
-		case "asc":
-			f = func(i, j int) bool {
-				return h.pkgs[i].Name > h.pkgs[j].Name
-			}
-		}
-		sort.Slice(h.pkgs, f)
 	}
 
 	t := template.New("spy")
@@ -395,8 +418,6 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Internal error")
 		return
 	}
-	return
-
 }
 
 func writeCacheFiles(pkgs []Package) {
@@ -418,14 +439,16 @@ func writeCacheFiles(pkgs []Package) {
 	}
 	defer pkgFile.Close()
 	for _, pkg := range pkgs {
-		fmt.Fprintf(pkgFile, "%v\t%v\t%s\n", pkg.Usage, pkg.Time.Unix(), pkg.Name)
+		fmt.Fprintf(pkgFile, "%v\t%v\t%s\n", pkg.Usage,
+			pkg.Time.Unix(), pkg.Name)
 		f, err := os.Create(cacheDir + pkg.Name)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 		for _, file := range pkg.Files {
-			fmt.Fprintf(f, "%v\t%v\t%s\n", file.Usage, file.Time.Unix(), file.Name)
+			fmt.Fprintf(f, "%v\t%v\t%s\n", file.Usage,
+				file.Time.Unix(), file.Name)
 		}
 		f.Close()
 	}
