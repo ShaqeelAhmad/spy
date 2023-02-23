@@ -15,22 +15,24 @@ _spy_ [-vsdm] [-f datafile] [-i interval] [-p procDir]
 	Show the spy version.
 
 *-s*
-	show the collected data
+	Show the collected data. It might be better to use the *spy_show*
+	program.
 
 *-d*
 	Enable debug logging.
 
 *-m*
-	collect mapped files. Look for "map_files" in *proc*(5)
+	Collect mapped files. Look for "map_files" in *proc*(5).
 
 *-f* <datafile>
-	Specify a data file to store the collected data to.
+	Specify a data file to store the collected data to. Defaults to
+	_/var/log/spy.log_.
 
 *-i* <interval>
-	the seconds to sleep between each data collection
+	The seconds to sleep between each data collection.
 
 *-p* <procDir>
-	the path to the proc filesystem. Look at *proc*(5)
+	The path to the proc filesystem. Look at *proc*(5)
 
 # ENVIRONMENT VARIABLES
 
@@ -40,11 +42,11 @@ _PATH_
 
 # CONFIG FILE
 
-$XDG_CONFIG_HOME/spy/update
+_$XDG_CONFIG_HOME/spy/update_
 
 These functions are defined but could be overridden by custom ones defined by the
 user in $XDG_CONFIG_HOME/spy/update because the helper scripts are just shell
-scripts and read this config file.
+scripts that source this config file.
 
 *list_package_files()*
 	This function must list out the files belonging to the package argument
@@ -55,17 +57,22 @@ scripts and read this config file.
 	You could filter it however you want using the shell.
 
 
-Copy the example file in EXAMPLE_CONFIG_PATH to $XDG_CONFIG_HOME/spy/. The file
-in EXAMPLE_CONFIG_PATH are not read by the program and serves only as an example
+Copy the example file in EXAMPLE_CONFIG_PATH to _$XDG_CONFIG_HOME/spy/_. The file
+in EXAMPLE_CONFIG_PATH is not read by the program and serves only as an example
 to the user.
 
-# HELPER SCRIPTS
+# HELPER PROGRAMS
 
 *spy_list_packages*
 	This script lists out the installed packages.
 
 *spy_list_package_files*
 	This scripts lists the files belonging to a package.
+
+*spy_show*
+	Displays the data table formatted in html which can viewed by a browser.
+
+	usage: spy_show [datafile]
 
 # OUTPUT FORMAT
 
@@ -74,11 +81,15 @@ format containing 3 fields. The first field is the usage frequency, the second
 field is the last used timestamp and the third field is either the filepaths in
 the data file or package names in _-s_ output.
 
-summary:
+summary of formats:
 
-data file = frequency \\t timestamp \\t filepath
+data file format:
 
-\-s flag   = frequency \\t timestamp \\t package
+	frequency \\t timestamp \\t filepath
+
+\-s flag format:
+
+	frequency \\t timestamp \\t package
 
 # SIGNALS
 *SIGTERM*, *SIGINT*
